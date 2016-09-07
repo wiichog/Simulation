@@ -12,12 +12,12 @@ def CompraPeriodicos(Tiempo,NumeroPeriodicos,NumeroPeriodicosTotal):
         x = random.random()
         if (x<0.30):#Para probalbilidad debajo de 30% compra de 11 periodicos
             CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
-            if (i != 9):
-                CompraInicial = CompraInicial - 2*(i-9)
+            if (NumeroPeriodicos != 9):
+                CompraInicial = CompraInicial - 2*(NumeroPeriodicos-9)
         elif (0.30<x<=0.70):#compra de 10 periodicos
             CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
             CompraInicial = CompraInicial + 0.50*(NumeroPeriodicosTotal-NumeroPeriodicos)#reembolso
-            if (i==11):
+            if (NumeroPeriodicos==11):
                 CompraInicial = CompraInicial - 2 #Ya que compramos uno mas le restamos 2 para que 2.50-2 = .5 me quedan .5 a mi devuelvo 2
         else:#compra de 9 periodicos
             CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
