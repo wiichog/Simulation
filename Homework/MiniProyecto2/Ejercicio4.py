@@ -7,17 +7,22 @@ Created on Tue Sep 06 11:43:18 2016
 import random
 
 def CompraPeriodicos(Tiempo,NumeroPeriodicos,NumeroPeriodicosTotal):
-    CompraInicial = -(1.5*NumeroPeriodicos)#Compra Inicial de Periodicos    
+    CompraInicial = -(1.5*NumeroPeriodicos*Tiempo)#Compra Inicial de Periodicos    
     for i in range(0,Tiempo):
         x = random.random()
-        if (x<0.30):#Para probalbilidad debajo de 30%
-            CompraInicial = CompraInicial + (2.5*NumeroPeriodicos)#Suma de ganancia
-        elif (0.30<x<=0.70):
-            CompraInicial = CompraInicial + (2.5*NumeroPeriodicos)#Suma de ganancia
+        if (x<0.30):#Para probalbilidad debajo de 30% compra de 11 periodicos
+            CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
+            if (i != 9):
+                CompraInicial = CompraInicial - 2*(i-9)
+        elif (0.30<x<=0.70):#compra de 10 periodicos
+            CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
             CompraInicial = CompraInicial + 0.50*(NumeroPeriodicosTotal-NumeroPeriodicos)#reembolso
-        else:
-            CompraInicial = CompraInicial + (2.5*NumeroPeriodicos)#Suma de ganancia
+            if (i==11):
+                CompraInicial = CompraInicial - 2 #Ya que compramos uno mas le restamos 2 para que 2.50-2 = .5 me quedan .5 a mi devuelvo 2
+        else:#compra de 9 periodicos
+            CompraInicial = CompraInicial + 2.5*(NumeroPeriodicos)#Suma de ganancia
             CompraInicial = CompraInicial + 0.50*(NumeroPeriodicosTotal-NumeroPeriodicos)#reembolso
+            
     return CompraInicial
 print ("")
 for i in range(9,12):
