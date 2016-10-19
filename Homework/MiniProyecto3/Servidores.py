@@ -1,118 +1,145 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Sep 22 07:13:56 2016
-
-@author: wiichog
-"""
 import random
-from math import *
+import math
 
-def Poison(S, Lambda):
-    return S - (1/Lambda) * log(random.random())
+def PoissonHomogeneo(s,Lambda): return s - (1/Lambda)*math.log(random.random())
+def Exponencial(Lambda):  return -float((1./Lambda)*math.log(random.random()))
+def sigEvento2(s, lamda): return s-(1/lamda)*math.log(random.random())
 
-#Ya que es homogeneo lambda del proceso de poisson es igual a lambda
-def exponencial(Lambda): return -(1.0/Lambda)*log(random.random())
+def Gorilla():
+    inf = float('inf')
+    TasaXSegundos = 2400./60
+    t = 0                               #tiempo inicial
+    T = 3600                            #tiempo final
+    A = []                              # contiene los tiempos de llegada
+    D = []                              # contiene los tiempos de salida
+    Na = 0                              # numero de llegadas
+    Nd = 0                              # numero de salidas
+    ta = 0                              # tiempo de llegada
+    td = 0                              # tiempo de salida
+    n = 0                               # numero de procesos en el servidor
+    Tp= 0                            
+    while t<=T:
+        if(ta<=td and ta<=T):
+            t = ta
+            Na = Na +1
+            n = n+1
+            ta = sigEvento2(t,TasaXSegundos)
+            if n==1:
+                Y = Exponencial(TasaXSegundos)
+                td = t + Y
+            A.append(t)
+        elif(td<ta and td<=T):
+            t =td
+            n =n -1
+            Nd = Nd +1
+            if n==0:
+                td = inf
+            else:
+                Y = Exponencial(TasaXSegundos)
+                td = t + Y
+                t = td
+            D.append(t)
+        elif(min(ta,td)>T and n>0):
+            t =td
+            n = n-1
+            Nd = Nd +1
+            if n>0:
+                Y = Exponencial(TasaXSegundos)
+                td = t + Y
+                t = td
+            D.append(t)
+        elif(min(ta,td)>T and n==0):
+            Tp = max(t - T,0)
+            break
     
-def ServidorDisponible(Array,Valor):#Aqui vamos a encontrar los NumeroDeServidores que esten disponible
-    for i in range(len(Array)):
-        if(Array[i]==Valor):
-            return i
-    return -1
     
-b = 6000/float(60) #lambdapp
-NumeroDeSolicitudes = b/float(10)
-colaPendientes = []
+    print "ESTE ES EL RESULTADO PARA EL SERVIDOR GORILLA"
+    print "El numero de llegadas al servidor fue de: ", Na
+    print "El tiempo que estuvo ocupado el servidor fue: ", td
+    print "El tiempo que estuvo libre el servidor fue de: ", td - ta
+    print "El tiempo estuvieron las solicitudes en cola", 
     
-NumeroDeServidores=10
-if(NumeroDeServidores==1):
-    NumeroDeSolicitudes = b
+
+def simulacionHormigas(num):
+    t = 0                               # tiempo inicial
+    T = 3600                            # tiempo final
+    A = []                              # contiene los tiempos de llegada
+    D = []                              # contiene los tiempos de salida
+    S = []                              # contiene los tiempos de sevicio
+    Na = 0                              # numero de llegadas
+    Nd = 0                              # numero de salidas
+    ta = Exponencial(40)             # tiempo de la siguiente llegada
+    tp = 0                              # tiempo extra de servicio
+    td = [100000]*num                   # tiempo de salida
+    n = 0                               # numero de procesos en el servidor
+    PS = [0]*num                        # Procesos servidores
+    SS = [0]*(1+num)                    # (solicitudes en el sistema, sol. atendida serv. 1, ..., serv n)
     
-inf = float('Inf')
-t = Na = Nd = n = 0
-ta = exponencial(b)#primer tiempo de llegada
-td = [inf]*NumeroDeServidores #cantidad de NumeroDeServidores
-tdind = [0]*NumeroDeServidores#vector con indices
-T = 3600#tiempo limite
-A = []#inicio atencion
-D = []#final atencion
-constante = 0
-tx = []
-#indTemporal = 0
-#No se que diablos paso aqui
-
-
-
-
-while ((t <= T) or (n > 0)):
-    if((ta<= min(td)) and (ta<= T)):#CasoNumero1
-        t = ta#tiempo va a ser igual al tiempo generado
-        Na += 1#aumentamos
-        n+= 1#aumentamos
-        ta = t + exponencial(b) #Generamos un nuevo tiempo
-        if(ServidorDisponible(td,inf)!= -1):
-            indTemporal = ServidorDisponible(td,inf) #Vamos a guarda la posicion en donde se encuentra el
-            #Servidor disponible
-            Y = exponencial(NumeroDeSolicitudes)#Generamos Y
-            td[indTemporal] = Y + t #Aqui ocupamos el servidor disponible
-            tx.append(Y) #agregamos cuanto tiempo estuvo ocupado el servidor
-            tdind[indTemporal] = Na
-    A.append(t)#Tiempo de llegada de la solicitud
-    D.append(0)#Tiempo de salida
-    if(min(td)< ta and min(td)<=T):#CasoNumero2
-        t = min(td)
-        Nd+= 1
-        indtemporal = ServidorDisponible(td,t)
-        D[tdind[indtemporal]-1] = t#como ya ingreso, se guarda la hora de salida
-        if(n<=len(td)):
-            td[indtemporal] = inf
-        else:
-            Y = exponencial(NumeroDeSolicitudes)#Generamos Y
-            tx.append(Y)   #agregamos cuanto tiempo estuvo ocupado el servidor
-            td[indtemporal] = t + Y#Aqui ocupamos el servidor disponible
-            tdind[indtemporal] = max(tdind)+1#Guardamos el tiempo maximo 
-            if ((td[indtemporal] - ta)>0):#Aqui miramos si el servicio se acabo o no
-                encola = td[indtemporal] - ta #si no se termino lo guardamos en la cola
-                colaPendientes.append(encola)#lo guardamos en la cola
-        n+=-1
-    if((min(ta,min(td))) > T and (n >0)):
-        t = min(td)
-        Nd+=1
-        if n <= len(td):#se queda vacio 
-            td[indtemporal] = inf
-        else:
-            #aun hay en cola, entonces nuevo tiempo
-            Y = exponencial(NumeroDeSolicitudes)
-            td[indtemporal] = t + Y
-            tx.append(Y)            
-            tdind[indtemporal] = max(tdind)+1
-        n += -1  
-    elif ((min(ta,min(td))) > T and (n == 0)): #Caso 4
-        break
-        Tp = max(t-T,0)
+    while t < T or SS[0] > 0:           # mientras no se ha llegado al final o haya +1 solicitud en cola 
+        m = min(td)
+        minimo = td.index(m)            # se busca el tiempo minimo de las salidas
         
-    
-prom = []
-for i in range(len(A)):
-    dif = D[i] - A[i]
-    prom.append(dif)
-
-prome = sum(prom)/len(prom)
-promC = sum(colaPendientes)/len(colaPendientes)
-    
-print "Numero de Ocurrencias ",Na/NumeroDeServidores
-print "Tiempo que servidor estuvo ocupado: ",sum(tx)/NumeroDeServidores
-print "Tiempo que estuvo desocupado: ",(sum(tx)-T)
-print "Tiempo en colo: ",sum(colaPendientes)
-print "En promedio, tiempo que estuvo solicitud en colo: ",promC
-print "En promedio, solicitud en colo: ",len(colaPendientes)/sum(colaPendientes)
-print "Las solicitudes en cola: ",len(colaPendientes)
-
-
-
-
-
-
+        if ta < td[minimo] and ta< T:   # si la ultima llegada es antes del cierre y aun se puede atender
+            t = ta                      # se mueve al tiempo de llegada
+            Na = Na +  1                # se aumenta el contador de llegadas
+            ta = ta + Exponencial(40)# se actualiza el nuevo tiempo de llegada con una var. exp.
+            A.append(t)                   # se agrega el tiempo actual (de llegada) a el registro de llegadas A
             
+            if SS[0] == 0:              # si no hay solicitudes en cola
+                S.append(t)             # se agrega el tiempo se servicio de la solicitud
+                SS[0] += 1              # contador de solicitudes en cola aumenta
+                SS[1] = Na              # se coloca la llegada en el primer servidor
+                td[0] = t + Exponencial(10) # se calcula el nuevo tiempo de salida como var. exp.
+                
+            elif SS[0] < num:            # si aun hay servidores para atender las solicitudes
+                notBusy = SS.index(0) - 1 # se busca un servidor disponible (se resta el espacio del contador de solicitudes siendo atendidas)
+                S.append(t)             # se agrega el tiempo se servicio de la solicitud
+                SS[0] += 1              # contador de solicitudes en cola aumenta
+                SS[notBusy+1] = Na      # se agrega la llegada al servidor disponible
+                td[notBusy] = t + Exponencial(10) # se calcula el nuevo tiempo de salida como var. exp.
+            
+            else:                       # si no hay disponibilidad de servidor
+                SS[0] += 1              # se agrega a la cola
+            
+        else:                           # si lo siguiente es una salida o ya se llegó al tiempo de cierre
+            t = td[minimo]              # tiempo actual es el minimo tiempo de salida
+            PS[minimo] += 1             # se agrega el proceso al contador de procs. del servidor
+            D.append(t)                 # se agrega el tiempo actual a las salidas
+            
+            if SS[0] <= num:            # si aun hay servidores para atender las solicitudes
+                SS[0] -= 1              # se retira la solicitud de la cola
+                td[minimo] = 100000     # no se conoce la siguiente salida, por lo que es un tiempo muy grande
+                SS[minimo + 1] = 0      # se retira la solicitud del servidor que la atendió
+            
+            else:                       # si no hay disponibilidad  (sigue en cola)
+                SS[0] *= -1
+                siguiente = max(SS)+1   # la siguiente sol. en entrar es el máximo de los que están siendo atendidos
+                SS[0] *= -1
+                S.append(t)             # se agrega el tiempo actual al de espera                
+                SS[0] -= 1              # se retira la solicitud de la cola
+                td[minimo] = t + Exponencial(10) # se calcula el nuevo tiempo de salida como var. exp.
+                SS[minimo + 1] = siguiente # entra la siguiente solicitud a un servidor disponible
+            
+    print "Solicitudes atendididas por cada servidor:"
+    print "-----------------------------------------"
+    for i in range (len(PS)):
+        print "\t"+"Servidor "+str(i+1)+":", PS[i], "solicitudes."
+    print "-----------------------------------------"
+    print "Tiempo total: ", sum(td), "segundos."
+    print "Solicitudes atendidas: ", Na
+    tot=0
+    for k in range(len(A)):
+        resta=S[k]-A[k]
+        tot=tot+resta
+    prom = tot/len(A)
+    print "Ultima llegada:", A[-1], "s."
+    print "Ultima salida:", D[-1], "s."
+    print "Promedio de tiempo en cola: ", prom, "segundos."
 
 
-
+    
+simulacionHormigas(16)
+print ""
+print ""
+print ""
+Gorilla()
