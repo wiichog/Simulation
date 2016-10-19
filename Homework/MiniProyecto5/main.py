@@ -24,11 +24,7 @@ def FuzzyAngle(ballAngle,dudeAngle,FuzzyStatement):
         return dudeAngle - 1
     
 def Draw(done,ballImage,dudeImage,ballX,ballY,dudeX,dudeY):
-    while True:
-        clock.tick(10)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                False
+    
         screen.fill(Green)
         screen.blit(ballImage,(ballX,ballY))
         screen.blit(dudeImage,(dudeX,dudeY))
@@ -39,9 +35,7 @@ def MoveDude(done,ballImage,dudeImage,ballX,ballY,dudeX,dudeY,Angle,FuzzyStateme
         for i in range(10):
             dudeX = dudeX + 1
             dudeY = dudeY + 1
-            print "Angle ", Angle
-            print  "InitposC X ", dudeX," InitposY ", dudeY
-            print "posicion X " ,abs(dudeX*math.cos(Angle)), " posicion y ",abs(dudeY*math.sin(Angle))
+            print "posicion X " ,abs(dudeX*math.cos(Angle)), " cos es " ,math.cos(Angle), " posicion y ",abs(dudeY*math.sin(Angle)), " sin es ", math.sin(Angle) 
             Draw(done,ballImage,dudeImage,ballX,ballY,abs(dudeX*math.cos(Angle)),abs(dudeY*math.sin(Angle)))
     
 
@@ -81,9 +75,13 @@ clock = pygame.time.Clock()
 ballImage = pygame.image.load('pelota.png')
 dudeImage = pygame.image.load('personaje.png')
 
-
-Draw(done,ballImage,dudeImage,ballXInitPos,ballYInitPos,dudeXInitPos,dudeYInitPos)
-MoveDude(done,ballImage,dudeImage,ballXInitPos,ballYInitPos,dudeXInitPos,dudeYInitPos,dudeAngleInit,"MuyLejos")
+while not done:
+        clock.tick(10)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            Draw(done,ballImage,dudeImage,ballXInitPos,ballYInitPos,dudeXInitPos,dudeYInitPos)
+            MoveDude(done,ballImage,dudeImage,ballXInitPos,ballYInitPos,dudeXInitPos,dudeYInitPos,dudeAngleInit,"MuyLejos")
 
 if(abs(Angulo-dudeAngleInit)>100):
     dudeAngleInit=FuzzyAngle(Angulo,dudeAngleInit,"MuyLejos")
